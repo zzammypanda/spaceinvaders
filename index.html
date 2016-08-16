@@ -36,20 +36,61 @@
                 width: 800px;
                 margin-left: auto;
                 margin-right: auto;
+				text-align: center;
+				color: GhostWhite;
             }
+			a:link, a:visited, a:hover, a:active {
+					color: GhostWhite;
+					text-decoration: none;
+					display: inline-block;
+			}			
+            #authors {
+				color: SlateGrey;
+            }
+			#authors a:link, #authors a:visited {
+					color: SlateGrey;
+					text-decoration: none;
+					display: inline-block;
+			}			
+			#authors a:hover, #authors a:active {
+				text-decoration: underline;
+			}
+            #credits {
+				color: DarkSlateGrey;
+			}
+			#credits a:link, #credits a:visited {
+					color: DarkSlateGrey;
+					text-decoration: none;
+					display: inline-block;
+			}			
+			#credits a:hover, #credits a:active {
+				text-decoration: underline;
+			}
+			
         </style>
     </head>
     <body>
         <div id="starfield"></div>
+		
+		
         <div id="gamecontainer">
         <canvas id="gameCanvas"></canvas>
         </div>
         <div id="info">
-            <p>Move with arrow keys, fire with the space bar. The invaders get faster and drop
-                more bombs as you complete each level!</p>
-            <p><a id="muteLink" href="#" onclick="toggleMute()">mute</a> | 
-                <a href="http://github.com/dwmkerr/spaceinvaders">spaceinvaders on github</a> | 
-                <a href="http://www.dwmkerr.com/experiments">more experiments</a> | <a href="http://www.dwmkerr.com">dwmkerr.com</a></p>
+            <p> <a id="muteLink" href="#" onclick="toggleMute()">mute</a> |
+				<a id="pauseLink" href="#" onclick="togglePause()">pause</a></p>
+			<p>Move with arrow keys, fire with the space bar.</p> 
+			<p>The invaders get faster and drop more bombs as you complete each level!</p>
+  			
+			<p id="authors">
+				<a href="http://github.com/zzammypanda/spaceinvaders">BreakoutInvaders</a> is brought to you by 
+                <a href="http://www.hitta.se/kim+utbult/">Kim Utbult</a> | 
+                <a href="http://www.hitta.se/yu+wang">Yu Wang</a> |
+                <a href="https://github.com/zzammypanda/">Maria Suomela</a></p> 
+
+				<p id="credits">The game is based on work by
+				<a href="https://github.com/dwmkerr/spaceinvaders">dwmkerr</a> and
+				<a href="https://github.com/jakesgordon/javascript-breakout/">jakesgordon</a></p>
         </div>
 
         <script src="js/starfield.js"></script>
