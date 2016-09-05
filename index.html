@@ -79,7 +79,7 @@
         <div id="info">
             <p> <a id="muteLink" href="#" onclick="toggleMute()">mute</a> |
 				<a id="pauseLink" href="#" onclick="togglePause()">pause</a></p>
-			<p>Move with arrow keys, fire with the space bar.</p> 
+			<p>Move ship with arrow keys.</p> 
 			<p>The invaders get faster and drop more bombs as you complete each level!</p>
   			
 			<p id="authors">
@@ -135,6 +135,12 @@
                 game.mute();
                 document.getElementById("muteLink").innerText = game.sounds.mute ? "unmute" : "mute";
             }
+			
+			function togglePause() {
+                game.pause();
+                document.getElementById("pauseLink").innerText = document.getElementById("pauseLink").innerText == "pause" ? "play" : "pause";
+            }
+
         </script>
         <script type="text/javascript">
 
