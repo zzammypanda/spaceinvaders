@@ -77,9 +77,7 @@
         <canvas id="gameCanvas"></canvas>
         </div>
         <div id="info">
-            <p> <a id="muteLink" href="#" onclick="toggleMute()">mute</a></p> 
-<!-- 			| <a id="pauseLink" href="#" onclick="togglePause()">pause</a> -->
-			
+            <p> <a id="muteLink" href="#" onclick="toggleMute()">mute</a></p> 			
 			<p>Move ship with arrow keys.</p> 
 			<p>The invaders get faster and drop more bombs as you complete each level!</p>
   			
@@ -137,11 +135,6 @@
                 document.getElementById("muteLink").innerText = game.sounds.mute ? "unmute" : "mute";
             }
 			
-/* 			function togglePause() {
-                //game.pause();
-                document.getElementById("pauseLink").innerText = document.getElementById("pauseLink").innerText == "pause" ? "play" : "pause";
-            } */
-
         </script>
         <script type="text/javascript">
 
