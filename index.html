@@ -8,8 +8,8 @@
     
             /* Styling needed for a fullscreen canvas and no scrollbars. */
             body, html { 
-            width: 100%;
-            height: 100%;
+            width: screen.availHeight;
+            height: screen.availWidth;
             margin: 0;
             padding: 0;
             overflow: hidden;
@@ -24,19 +24,23 @@
                 top: 0px;
             }
             #gamecontainer {
-                width: 800px;
-                margin-left: auto;
-                margin-right: auto;
+                width: 100%;
+                margin-left: 25%;
+                margin-right: 25%;
+				margin-top: 5%;
+				 
             }
             #gamecanvas { 
-                width: 800px;
-                height: 600px;
+                width: 100%;
+                height: 100%;
+				margin-top: 5%;
             }
             #info {
-                width: 800px;
-                margin-left: auto;
-                margin-right: auto;
-				text-align: center;
+                width: 70%;
+                margin-left: 15%;
+                margin-right: 15%;
+				margin-bottom: 5%;
+				text-align: center;	
 				color: GhostWhite;
             }
 			a:link, a:visited, a:hover, a:active {
@@ -77,8 +81,9 @@
         <canvas id="gameCanvas"></canvas>
         </div>
         <div id="info">
-            <p> <a id="muteLink" href="#" onclick="toggleMute()">mute</a></p> 			
-			<p>Move ship with arrow keys. Press 'p' to pause game.</p>
+            <p> <a id="muteLink" href="#" onclick="toggleMute()">mute</a> |
+				<a id="pauseLink" href="#" onclick="togglePause()">pause</a></p>
+			<p>Move with arrow keys, fire with the space bar.</p> 
 			<p>The invaders get faster and drop more bombs as you complete each level!</p>
   			
 			<p id="authors">
@@ -102,11 +107,18 @@
             starfield.initialise(container);
             starfield.start();
 
-            //  Setup the canvas.
+			
+			var newWidth = window.innerWidth;
+			var newHeight = window.innerHeight;
+			var widthToHeight = 4 / 3;
+			var newWidthToHeight = newWidth / newHeight;
+			
+					
+		//  Setup the canvas.
             var canvas = document.getElementById("gameCanvas");
-            canvas.width = 800;
-            canvas.height = 600;
-
+			canvas.width = newWidth/2;
+			canvas.height = newHeight/2;
+			
             //  Create the game.
             var game = new Game();
 
@@ -134,20 +146,19 @@
                 game.mute();
                 document.getElementById("muteLink").innerText = game.sounds.mute ? "unmute" : "mute";
             }
-			
         </script>
         <script type="text/javascript">
 
-			var _gaq = _gaq || [];
-			_gaq.push(['_setAccount', 'UA-41728580-1']);
-			_gaq.push(['_trackPageview']);
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-41728580-1']);
+  _gaq.push(['_trackPageview']);
 
-			(function() {
-				var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-				ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-				var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-			})();
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
 
-		</script>
+</script>
     </body>
 </html>
