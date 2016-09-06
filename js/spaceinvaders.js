@@ -24,6 +24,12 @@
 //  Creates an instance of the Game class.
 function Game() {
 
+var w = window.innerWidth || document.documentElement.clientWidth
+		|| document.body.clientWidth;
+
+var h = window.innerHeight || document.documentElement.clientHeight
+		|| document.body.clientHeight;
+
     //  Set the initial config.
     this.config = {
         bombRate: 0.05,
@@ -32,10 +38,9 @@ function Game() {
         invaderInitialVelocity: 25,
         invaderAcceleration: 0,
         invaderDropDistance: 20,
-        rocketVelocity: 120,
-        rocketMaxFireRate: 2,
         gameWidth: 400,
         gameHeight: 300,
+
         fps: 50,
         debugMode: false,
         invaderRanks: 5,
@@ -75,6 +80,8 @@ Game.prototype.initialise = function(gameCanvas) {
     this.width = gameCanvas.width;
     this.height = gameCanvas.height;
 
+	
+	
     //  Set the state game bounds.
     this.gameBounds = {
         left: gameCanvas.width / 2 - this.config.gameWidth / 2,
@@ -147,7 +154,9 @@ function GameLoop(game) {
 
         //  Get the drawing context.
         var ctx = this.gameCanvas.getContext("2d");
-        
+		
+		
+		
         //  Update if we have an update function. Also draw
         //  if we have a draw function.
         if(currentState.update) {
@@ -229,6 +238,12 @@ WelcomeState.prototype.draw = function(game, dt, ctx) {
     //  Clear the background.
     ctx.clearRect(0, 0, game.width, game.height);
 
+	ctx.lineWidth = 10;
+	ctx.strokeStyle="#FF0000";
+	ctx.strokeRect(0,0,game.width, game.height);
+	ctx.fill();
+	
+	
     ctx.font="30px Arial";
     ctx.fillStyle = '#ffffff';
     ctx.textBaseline="center"; 
@@ -237,6 +252,8 @@ WelcomeState.prototype.draw = function(game, dt, ctx) {
     ctx.font="16px Arial";
 
     ctx.fillText("Press 'Space' to start.", game.width / 2, game.height/2); 
+	
+	
 };
 
 WelcomeState.prototype.keyDown = function(game, keyCode) {
@@ -292,12 +309,10 @@ function PlayState(config, level) {
     this.invaderCurrentVelocity =  10;
     this.invaderCurrentDropDistance =  0;
     this.invadersAreDropping =  false;
-    this.lastRocketTime = null;
-
+    
     //  Game entities.
     this.ship = null;
     this.invaders = [];
-    this.rockets = [];
     this.bombs = [];
 }
 
@@ -349,10 +364,7 @@ PlayState.prototype.update = function(game, dt) {
     if(game.pressedKeys[39]) {
         this.ship.x += this.shipSpeed * dt;
     }
-    if(game.pressedKeys[32]) {
-        this.fireRocket();
-    }
-
+   
     //  Keep the ship in bounds.
     if(this.ship.x < game.gameBounds.left) {
         this.ship.x = game.gameBounds.left;
@@ -372,27 +384,16 @@ PlayState.prototype.update = function(game, dt) {
         }
     }
 
-    //  Move each rocket.
-    for(i=0; i<this.rockets.length; i++) {
-        var rocket = this.rockets[i];
-        rocket.y -= dt * rocket.velocity;
-
-        //  If the rocket has gone off the screen remove it.
-        if(rocket.y < 0) {
-            this.rockets.splice(i--, 1);
-        }
-    }
-
     //  Move the invaders.
     var hitLeft = false, hitRight = false, hitBottom = false;
     for(i=0; i<this.invaders.length; i++) {
         var invader = this.invaders[i];
         var newx = invader.x + this.invaderVelocity.x * dt;
         var newy = invader.y + this.invaderVelocity.y * dt;
-        if(hitLeft == false && newx < game.gameBounds.left) {
+        if(hitLeft == false && ((newx -40) < game.gameBounds.left)) {
             hitLeft = true;
         }
-        else if(hitRight == false && newx > game.gameBounds.right) {
+        else if(hitRight == false && ((newx +40) > game.gameBounds.right)) {
             hitRight = true;
         }
         else if(hitBottom == false && newy > game.gameBounds.bottom) {
@@ -438,20 +439,6 @@ PlayState.prototype.update = function(game, dt) {
         var invader = this.invaders[i];
         var bang = false;
 
-        for(var j=0; j<this.rockets.length; j++){
-            var rocket = this.rockets[j];
-
-            if(rocket.x >= (invader.x - invader.width/2) && rocket.x <= (invader.x + invader.width/2) &&
-                rocket.y >= (invader.y - invader.height/2) && rocket.y <= (invader.y + invader.height/2)) {
-                
-                //  Remove the rocket, set 'bang' so we don't process
-                //  this rocket again.
-                this.rockets.splice(j--, 1);
-                bang = true;
-                game.score += this.config.pointsPerInvader;
-                break;
-            }
-        }
         if(bang) {
             this.invaders.splice(i--, 1);
             game.sounds.playSound('bang');
@@ -525,10 +512,19 @@ PlayState.prototype.draw = function(game, dt, ctx) {
     //  Clear the background.
     ctx.clearRect(0, 0, game.width, game.height);
     
+	
+	ctx.lineWidth = 10;
+	ctx.strokeStyle="#FF0000";
+	ctx.strokeRect(0,0,game.width, game.height);
+	ctx.fill();
+	
+	
     //  Draw ship.
-    ctx.fillStyle = '#00ebeb';
-    ctx.fillRect(this.ship.x - (this.ship.width / 2), this.ship.y - (this.ship.height / 2), this.ship.width, this.ship.height);
-
+    ctx.strokeStyle = "rgba(200, 200, 200, 0.5)";
+    ctx.fillStyle = '#f56f18';
+    roundRect(ctx, this.ship.x - (this.ship.width / 2), this.ship.y - (this.ship.height / 2), this.ship.width, this.ship.height, 5, true);
+	
+	
     //  Draw invaders.
     ctx.fillStyle = '#006600';
     for(var i=0; i<this.invaders.length; i++) {
@@ -541,13 +537,6 @@ PlayState.prototype.draw = function(game, dt, ctx) {
     for(var i=0; i<this.bombs.length; i++) {
         var bomb = this.bombs[i];
         ctx.fillRect(bomb.x - 2, bomb.y - 2, 4, 4);
-    }
-
-    //  Draw rockets.
-    ctx.fillStyle = '#ff0000';
-    for(var i=0; i<this.rockets.length; i++) {
-        var rocket = this.rockets[i];
-        ctx.fillRect(rocket.x, rocket.y - 2, 1, 4);
     }
 
     //  Draw info.
@@ -574,10 +563,6 @@ PlayState.prototype.draw = function(game, dt, ctx) {
 
 PlayState.prototype.keyDown = function(game, keyCode) {
 
-    if(keyCode == 32) {
-        //  Fire!
-        this.fireRocket();
-    }
     if(keyCode == 80) {
         //  Push the pause state.
         game.pushState(new PauseState());
@@ -588,19 +573,44 @@ PlayState.prototype.keyUp = function(game, keyCode) {
 
 };
 
-PlayState.prototype.fireRocket = function() {
-    //  If we have no last rocket time, or the last rocket time 
-    //  is older than the max rocket rate, we can fire.
-    if(this.lastRocketTime === null || ((new Date()).valueOf() - this.lastRocketTime) > (1000 / this.config.rocketMaxFireRate))
-    {   
-        //  Add a rocket.
-        this.rockets.push(new Rocket(this.ship.x, this.ship.y - 12, this.config.rocketVelocity));
-        this.lastRocketTime = (new Date()).valueOf();
-
-        //  Play the 'shoot' sound.
-        game.sounds.playSound('shoot');
-    }
-};
+/**
+ * Draws a rounded rectangle using the current state of the canvas. 
+ * If you omit the last three params, it will draw a rectangle 
+ * outline with a 5 pixel border radius 
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {Number} x The top left x coordinate
+ * @param {Number} y The top left y coordinate 
+ * @param {Number} width The width of the rectangle 
+ * @param {Number} height The height of the rectangle
+ * @param {Number} radius The corner radius. Defaults to 5;
+ * @param {Boolean} fill Whether to fill the rectangle. Defaults to false.
+ * @param {Boolean} stroke Whether to stroke the rectangle. Defaults to true.
+ */
+function roundRect(ctx, x, y, width, height, radius, fill, stroke) {
+  if (typeof stroke == "undefined" ) {
+    stroke = true;
+  }
+  if (typeof radius === "undefined") {
+    radius = 5;
+  }
+  ctx.beginPath();
+  ctx.moveTo(x + radius, y);
+  ctx.lineTo(x + width - radius, y);
+  ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+  ctx.lineTo(x + width, y + height - radius);
+  ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+  ctx.lineTo(x + radius, y + height);
+  ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+  ctx.lineTo(x, y + radius);
+  ctx.quadraticCurveTo(x, y, x + radius, y);
+  ctx.closePath();
+  if (stroke) {
+    ctx.stroke();
+  }
+  if (fill) {
+    ctx.fill();
+  }        
+}
 
 function PauseState() {
 
@@ -685,20 +695,8 @@ LevelIntroState.prototype.draw = function(game, dt, ctx) {
 function Ship(x, y) {
     this.x = x;
     this.y = y;
-    this.width = 20;
-    this.height = 16;
-}
-
-/*
-    Rocket
-
-    Fired by the ship, they've got a position, velocity and state.
-
-    */
-function Rocket(x, y, velocity) {
-    this.x = x;
-    this.y = y;
-    this.velocity = velocity;
+    this.width = 30 * 1.5; //60
+    this.height = 25* 2/3;  //16
 }
 
 /*
