@@ -53,6 +53,7 @@ function Game() {
     this.intervalId = 0;
     this.score = 0;
     this.level = 1;
+	this.player = "Anonymous";
 
     //  The state stack.
     this.stateStack = [];
@@ -67,6 +68,8 @@ function Game() {
 
 //  Initialis the Game with a canvas.
 Game.prototype.initialise = function(gameCanvas) {
+
+	this.player = prompt('Please tell us your name, stranger!');
 
     //  Set the game canvas.
     this.gameCanvas = gameCanvas;
@@ -266,11 +269,31 @@ GameOverState.prototype.draw = function(game, dt, ctx) {
     ctx.fillStyle = '#ffffff';
     ctx.textBaseline="center"; 
     ctx.textAlign="center"; 
+/*
     ctx.fillText("Game Over!", game.width / 2, game.height/2 - 40); 
     ctx.font="16px Arial";
     ctx.fillText("You scored " + game.score + " and got to level " + game.level, game.width / 2, game.height/2);
     ctx.font="16px Arial";
+    ctx.fillText("Press 'Space' to play again.", game.width / 2, game.height/2 + 40); 
+ */
+    ctx.fillText("Game Over, " + game.player + "!", game.width / 2, game.height/2 - 40); 
+    ctx.font="16px Arial";
+    ctx.fillText("You scored " + game.score + " and got to level " + game.level, game.width / 2, game.height/2);	
+    ctx.font="16px Arial";
     ctx.fillText("Press 'Space' to play again.", game.width / 2, game.height/2 + 40);   
+
+	ctx.font="20px Arial";
+	var textOffset = game.height/2 + 140;
+    ctx.fillText("Hall Of Fame", game.width / 2, textOffset); 
+	textOffset += 5;	
+	ctx.font="16px Arial";
+	textOffset += 25; 
+	ctx.fillText("A 100", game.width / 2, textOffset);
+	textOffset += 25; 
+	ctx.fillText("B 75", game.width / 2, textOffset);
+	textOffset += 25; 
+	ctx.fillText("C 50", game.width / 2, textOffset);
+	
 };
 
 GameOverState.prototype.keyDown = function(game, keyCode) {
@@ -812,3 +835,16 @@ Sounds.prototype.playSound = function(name) {
     source.connect(this.audioContext.destination);
     source.start(0);
 };
+
+/*Adds highscore entry to database */
+function addHighscoreEntry() {
+	insertDB(game.player, game.score, 2);
+}
+
+/*Gets highscore entries from database */
+function getHighscoreEntries() {
+	var db = selectDB(2);
+	var hs = db.slice(0, 3);
+	return hs;
+}	
+
