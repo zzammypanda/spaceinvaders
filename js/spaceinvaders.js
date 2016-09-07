@@ -1,22 +1,16 @@
 /*
   spaceinvaders.js
-
   the core logic for the space invaders game.
-
 */
 
 /*  
     Game Class
-
     The Game class represents a Space Invaders game.
     Create an instance of it, change any of the default values
     in the settings, and call 'start' to run the game.
-
     Call 'initialise' before 'start' to set the canvas the game
     will draw to.
-
     Call 'moveShip' or 'shipFire' to control the ship.
-
     Listen for 'gameWon' or 'gameLost' events to handle the game
     ending.
 */
@@ -53,7 +47,8 @@ function Game() {
     this.intervalId = 0;
     this.score = 0;
     this.level = 1;
-	this.player = "Anonymous";
+	this.player = ""; //Added maria
+	this.highscores = []; //Added maria
 
     //  The state stack.
     this.stateStack = [];
@@ -68,8 +63,11 @@ function Game() {
 
 //  Initialis the Game with a canvas.
 Game.prototype.initialise = function(gameCanvas) {
-
-	this.player = prompt('Please tell us your name, stranger!');
+	// Added maria
+	this.player = prompt('Please tell us your name, stranger!'); // Added maria
+	if (this.player == null || this.player === "")
+		this.player = "Fegis";
+	
 
     //  Set the game canvas.
     this.gameCanvas = gameCanvas;
@@ -236,7 +234,7 @@ WelcomeState.prototype.draw = function(game, dt, ctx) {
     ctx.fillStyle = '#ffffff';
     ctx.textBaseline="center"; 
     ctx.textAlign="center"; 
-    ctx.fillText("Space Invaders", game.width / 2, game.height/2 - 40); 
+    ctx.fillText("BreakoutInvaders", game.width / 2, game.height/2 - 40); 
     ctx.font="16px Arial";
 
     ctx.fillText("Press 'Space' to start.", game.width / 2, game.height/2); 
@@ -264,36 +262,29 @@ GameOverState.prototype.draw = function(game, dt, ctx) {
 
     //  Clear the background.
     ctx.clearRect(0, 0, game.width, game.height);
-
     ctx.font="30px Arial";
     ctx.fillStyle = '#ffffff';
     ctx.textBaseline="center"; 
     ctx.textAlign="center"; 
-/*
-    ctx.fillText("Game Over!", game.width / 2, game.height/2 - 40); 
-    ctx.font="16px Arial";
-    ctx.fillText("You scored " + game.score + " and got to level " + game.level, game.width / 2, game.height/2);
-    ctx.font="16px Arial";
-    ctx.fillText("Press 'Space' to play again.", game.width / 2, game.height/2 + 40); 
- */
-    ctx.fillText("Game Over, " + game.player + "!", game.width / 2, game.height/2 - 40); 
+		
+	ctx.fillText("Game Over, " + game.player + "!", game.width / 2, game.height/2 - 40); 
     ctx.font="16px Arial";
     ctx.fillText("You scored " + game.score + " and got to level " + game.level, game.width / 2, game.height/2);	
     ctx.font="16px Arial";
     ctx.fillText("Press 'Space' to play again.", game.width / 2, game.height/2 + 40);   
 
+    //Added Maria
 	ctx.font="20px Arial";
-	var textOffset = game.height/2 + 140;
+	var textOffset = game.height/2 + 120;
     ctx.fillText("Hall Of Fame", game.width / 2, textOffset); 
 	textOffset += 5;	
 	ctx.font="16px Arial";
-	textOffset += 25; 
-	ctx.fillText("A 100", game.width / 2, textOffset);
-	textOffset += 25; 
-	ctx.fillText("B 75", game.width / 2, textOffset);
-	textOffset += 25; 
-	ctx.fillText("C 50", game.width / 2, textOffset);
-	
+	var i;
+	for (i=0; i < 5; i++){
+		textOffset += 25; 
+		ctx.fillText(game.highscores[i], game.width / 2, textOffset);		
+	}
+
 };
 
 GameOverState.prototype.keyDown = function(game, keyCode) {
@@ -532,6 +523,11 @@ PlayState.prototype.update = function(game, dt) {
 
     //  Check for failure
     if(game.lives <= 0) {
+
+		//Added maria
+		insertDB(game.player, game.score, 2); //Added maria
+		game.highscores=selectDB(2); //Added maria
+		
         game.moveToState(new GameOverState());
     }
 
@@ -549,7 +545,7 @@ PlayState.prototype.draw = function(game, dt, ctx) {
     ctx.clearRect(0, 0, game.width, game.height);
     
     //  Draw ship.
-    ctx.fillStyle = '#00ebeb';
+    ctx.fillStyle = '#999999';
     ctx.fillRect(this.ship.x - (this.ship.width / 2), this.ship.y - (this.ship.height / 2), this.ship.width, this.ship.height);
 
     //  Draw invaders.
@@ -652,7 +648,6 @@ PauseState.prototype.draw = function(game, dt, ctx) {
 
 /*  
     Level Intro State
-
     The Level Intro state shows a 'Level X' message and
     a countdown for the level.
 */
@@ -701,9 +696,7 @@ LevelIntroState.prototype.draw = function(game, dt, ctx) {
 /*
  
   Ship
-
   The ship has a position and that's about it.
-
 */
 function Ship(x, y) {
     this.x = x;
@@ -714,9 +707,7 @@ function Ship(x, y) {
 
 /*
     Rocket
-
     Fired by the ship, they've got a position, velocity and state.
-
     */
 function Rocket(x, y, velocity) {
     this.x = x;
@@ -726,9 +717,7 @@ function Rocket(x, y, velocity) {
 
 /*
     Bomb
-
     Dropped by invaders, they've got position, velocity.
-
 */
 function Bomb(x, y, velocity) {
     this.x = x;
@@ -738,7 +727,6 @@ function Bomb(x, y, velocity) {
  
 /*
     Invader 
-
     Invader's have position, type, rank/file and that's about it. 
 */
 
@@ -754,12 +742,10 @@ function Invader(x, y, rank, file, type) {
 
 /*
     Game State
-
     A Game State is simply an update and draw proc.
     When a game is in the state, the update and draw procs are
     called, with a dt value (dt is delta time, i.e. the number)
     of seconds to update or draw).
-
 */
 function GameState(updateProc, drawProc, keyDown, keyUp, enter, leave) {
     this.updateProc = updateProc;
@@ -771,12 +757,9 @@ function GameState(updateProc, drawProc, keyDown, keyUp, enter, leave) {
 }
 
 /*
-
     Sounds
-
     The sounds class is used to asynchronously load sounds and allow
     them to be played.
-
 */
 function Sounds() {
 
@@ -836,15 +819,4 @@ Sounds.prototype.playSound = function(name) {
     source.start(0);
 };
 
-/*Adds highscore entry to database */
-function addHighscoreEntry() {
-	insertDB(game.player, game.score, 2);
-}
-
-/*Gets highscore entries from database */
-function getHighscoreEntries() {
-	var db = selectDB(2);
-	var hs = db.slice(0, 3);
-	return hs;
-}	
-
+git 
