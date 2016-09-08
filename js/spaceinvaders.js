@@ -17,6 +17,9 @@
 
 //  Creates an instance of the Game class.
 function Game() {
+	var w = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+
+	var h = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
 
     //  Set the initial config.
     this.config = {
@@ -26,8 +29,8 @@ function Game() {
         invaderInitialVelocity: 25,
         invaderAcceleration: 0,
         invaderDropDistance: 20,
-        rocketVelocity: 120,
-        rocketMaxFireRate: 2,
+        //rocketVelocity: 120,   //Yu tagit bort
+        //rocketMaxFireRate: 2,  // Yu tagit bort
         gameWidth: 400,
         gameHeight: 300,
         fps: 50,
@@ -47,8 +50,8 @@ function Game() {
     this.intervalId = 0;
     this.score = 0;
     this.level = 1;
-	this.player = ""; //Added maria
-	this.highscores = []; //Added maria
+	this.player = ""; 
+	this.highscores = [];
 
     //  The state stack.
     this.stateStack = [];
@@ -63,10 +66,10 @@ function Game() {
 
 //  Initialis the Game with a canvas.
 Game.prototype.initialise = function(gameCanvas) {
-	// Added maria
+	
 	this.player = prompt('Please tell us your name, stranger!'); // Added maria
 	if (this.player == null || this.player === "")
-		this.player = "Fegis";
+		this.player = "fegis";
 	
 
     //  Set the game canvas.
@@ -230,6 +233,13 @@ WelcomeState.prototype.draw = function(game, dt, ctx) {
     //  Clear the background.
     ctx.clearRect(0, 0, game.width, game.height);
 
+	// Yu added
+	ctx.lineWidth = 10;
+	ctx.strokeStyle="#006600";		// Original FF0000, maria changed to same as invaders, slightly less intrusive
+	ctx.strokeRect(0,0,game.width, game.height);
+	ctx.fill();
+	
+	
     ctx.font="30px Arial";
     ctx.fillStyle = '#ffffff';
     ctx.textBaseline="center"; 
@@ -273,14 +283,13 @@ GameOverState.prototype.draw = function(game, dt, ctx) {
     ctx.font="16px Arial";
     ctx.fillText("Press 'Space' to play again.", game.width / 2, game.height/2 + 40);   
 
-    //Added Maria
 	ctx.font="20px Arial";
 	var textOffset = game.height/2 + 120;
     ctx.fillText("Hall Of Fame", game.width / 2, textOffset); 
 	textOffset += 5;	
 	ctx.font="16px Arial";
 	var i;
-	for (i=0; i < 5; i++){
+	for (i=0; i < 3; i++){
 		textOffset += 25; 
 		ctx.fillText(game.highscores[i], game.width / 2, textOffset);		
 	}
@@ -306,12 +315,13 @@ function PlayState(config, level) {
     this.invaderCurrentVelocity =  10;
     this.invaderCurrentDropDistance =  0;
     this.invadersAreDropping =  false;
-    this.lastRocketTime = null;
+    //this.lastRocketTime = null; // Yu tagit bort
 
     //  Game entities.
     this.ship = null;
+    this.ball = null;		// Kim lagt tills
     this.invaders = [];
-    this.rockets = [];
+    //this.rockets = [];   // Yu tagit bort
     this.bombs = [];
 }
 
@@ -319,6 +329,9 @@ PlayState.prototype.enter = function(game) {
 
     //  Create the ship.
     this.ship = new Ship(game.width / 2, game.gameBounds.bottom);
+
+    //  Create new ball.
+    this.ball = new Ball(game.width / 2, game.gameBounds.bottom - 10);		//Kim lagt till
 
     //  Setup initial state.
     this.invaderCurrentVelocity =  10;
@@ -341,7 +354,7 @@ PlayState.prototype.enter = function(game) {
         for(var file = 0; file < files; file++) {
             invaders.push(new Invader(
                 (game.width / 2) + ((files/2 - file) * 200 / files),
-                (game.gameBounds.top + rank * 20),
+                  (game.gameBounds.top + 20 + rank * 20), 	// Original: (game.gameBounds.top + rank * 20),
                 rank, file, 'Invader'));
         }
     }
@@ -363,9 +376,9 @@ PlayState.prototype.update = function(game, dt) {
     if(game.pressedKeys[39]) {
         this.ship.x += this.shipSpeed * dt;
     }
-    if(game.pressedKeys[32]) {
-        this.fireRocket();
-    }
+    //if(game.pressedKeys[32]) { // Yu tagit bort
+    //    this.fireRocket();     
+    //}                           
 
     //  Keep the ship in bounds.
     if(this.ship.x < game.gameBounds.left) {
@@ -386,30 +399,72 @@ PlayState.prototype.update = function(game, dt) {
         }
     }
 
-    //  Move each rocket.
-    for(i=0; i<this.rockets.length; i++) {
-        var rocket = this.rockets[i];
-        rocket.y -= dt * rocket.velocity;
+	/*													
+    //  Move each rocket.                                 // Yu tagit bort
+    for(i=0; i<this.rockets.length; i++) {			
+        var rocket = this.rockets[i];				
+        rocket.y -= dt * rocket.velocity;			
 
-        //  If the rocket has gone off the screen remove it.
-        if(rocket.y < 0) {
-            this.rockets.splice(i--, 1);
-        }
-    }
+        //  If the rocket has gone off the screen remove it.	
+        if(rocket.y < 0) {										
+            this.rockets.splice(i--, 1);						
+        }														
+    }															
+	*/
+	
+	   // Move the ball											// Kim lagt till
+	   
+    this.ball.position.add(this.ball.direction);
+	if(this.ball.position.y <= game.gameBounds.top) { //|| this.ball.position.y >= this.ship.y
+		//this.ball.direction.scale(-1); // invert!
+		if(this.ball.direction.x > 0){
+			this.ball.direction.rotate(Math.PI / 2);
+		}
+		else{
+			this.ball.direction.rotate(Math.PI / -2);
+		}
+	}
+	if(this.ball.position.y >= this.ship.y)
+		if(this.ball.direction.x > 0){
+			this.ball.direction.rotate(Math.PI / -2);
+		}
+		else{
+			this.ball.direction.rotate(Math.PI / 2);
+		}
+	
+	if(this.ball.position.x <= game.gameBounds.left) {
+		if(this.ball.direction.y > 0){
+			this.ball.direction.rotate(Math.PI / -2);
+		}
+		else{
+			this.ball.direction.rotate(Math.PI / 2);
+		}
+	}
 
+	if(this.ball.position.x >= game.gameBounds.right) {
+		
+		if(this.ball.direction.y > 0){
+			this.ball.direction.rotate(Math.PI / 2);
+		}
+		else{
+			this.ball.direction.rotate(Math.PI / -2);
+		}
+	}															// Kim lagt till hit
+	
+	
     //  Move the invaders.
     var hitLeft = false, hitRight = false, hitBottom = false;
     for(i=0; i<this.invaders.length; i++) {
         var invader = this.invaders[i];
         var newx = invader.x + this.invaderVelocity.x * dt;
         var newy = invader.y + this.invaderVelocity.y * dt;
-        if(hitLeft == false && newx < game.gameBounds.left) {
+        if(hitLeft == false && ((newx -40) < game.gameBounds.left)) { // Yu added, Original: if(hitLeft == false && newx < game.gameBounds.left) {
             hitLeft = true;
         }
-        else if(hitRight == false && newx > game.gameBounds.right) {
+        else if(hitRight == false && ((newx +40) > game.gameBounds.right)) { // Yu added, Original: else if(hitRight == false && newx > game.gameBounds.right) {
             hitRight = true;
         }
-        else if(hitBottom == false && newy > game.gameBounds.bottom) {
+        else if(hitBottom == false && newy > game.gameBounds.bottom) { 
             hitBottom = true;
         }
 
@@ -451,10 +506,14 @@ PlayState.prototype.update = function(game, dt) {
     for(i=0; i<this.invaders.length; i++) {
         var invader = this.invaders[i];
         var bang = false;
+		
+		/*for(var j=0; j<this.rockets.length; j++){	// Kim tagit bort		// Yu tagit bort
+            var rocket = this.rockets[j];			// Kim tagit bort
 
-        for(var j=0; j<this.rockets.length; j++){
-            var rocket = this.rockets[j];
-
+													// Kim lagt till
+			//if(this.ball.position.x >= (invader.x - invader.width/2) && this.ball.position.x <= (invader.x + invader.width/2) && this.ball.position.y >= (invader.y - invader.height/2) && this.ball.position.y <= (invader.y + invader.height/2)) {
+  
+													// Kim tagit bort
             if(rocket.x >= (invader.x - invader.width/2) && rocket.x <= (invader.x + invader.width/2) &&
                 rocket.y >= (invader.y - invader.height/2) && rocket.y <= (invader.y + invader.height/2)) {
                 
@@ -463,11 +522,36 @@ PlayState.prototype.update = function(game, dt) {
                 this.rockets.splice(j--, 1);
                 bang = true;
                 game.score += this.config.pointsPerInvader;
+				
+				//this.invaders.splice(i--, 1);				// Kim lagt till
+				//this.ball.direction.rotate(Math.PI / 2);	// Kim lagt till
+				
                 break;
             }
-        }
+        } */
+		
+        //for(var j=0; j<this.rockets.length; j++){	// Kim tagit bort		// Yu tagit bort
+            //var rocket = this.rockets[j];			// Kim tagit bort
+
+													// Kim lagt till
+			if(this.ball.position.x >= (invader.x - invader.width/2) && this.ball.position.x <= (invader.x + invader.width/2) && this.ball.position.y >= (invader.y - invader.height/2) && this.ball.position.y <= (invader.y + invader.height/2)) {
+													// Kim tagit bort
+            //if(rocket.x >= (invader.x - invader.width/2) && rocket.x <= (invader.x + invader.width/2) && rocket.y >= (invader.y - invader.height/2) && rocket.y <= (invader.y + invader.height/2)) {
+                
+                //  Remove the rocket, set 'bang' so we don't process
+                //  this rocket again.
+                this.rockets.splice(j--, 1);
+                bang = true;
+                game.score += this.config.pointsPerInvader;
+				
+				this.invaders.splice(i--, 1);				// Kim lagt till
+				this.ball.direction.rotate(Math.PI / 2);	// Kim lagt till
+				
+                break;
+            }
+        //}		 											// Kim tagit bort // Yu tagit bort hit
         if(bang) {
-            this.invaders.splice(i--, 1);
+            //this.invaders.splice(i--, 1);				// Kim tagit bort
             game.sounds.playSound('bang');
         }
     }
@@ -521,13 +605,10 @@ PlayState.prototype.update = function(game, dt) {
         }
     }
 
-    //  Check for failure
+    //  Check for Game Over and write score + play name to database, get highscore from database
     if(game.lives <= 0) {
-
-		//Added maria
-		insertDB(game.player, game.score, 2); //Added maria
-		game.highscores=selectDB(2); //Added maria
-		
+		insertDB(game.player, game.score, 2); 
+		game.highscores=selectDB(2); 		
         game.moveToState(new GameOverState());
     }
 
@@ -544,10 +625,21 @@ PlayState.prototype.draw = function(game, dt, ctx) {
     //  Clear the background.
     ctx.clearRect(0, 0, game.width, game.height);
     
-    //  Draw ship.
-    ctx.fillStyle = '#999999';
-    ctx.fillRect(this.ship.x - (this.ship.width / 2), this.ship.y - (this.ship.height / 2), this.ship.width, this.ship.height);
-
+	
+	ctx.lineWidth = 10;									// Yu added	
+	ctx.strokeStyle="#006600";					// Original FF0000, maria changed to same as invaders, less intrusive
+	ctx.strokeRect(0,0,game.width, game.height);
+	ctx.fill();
+	
+    //  Original Draw ship.
+    //ctx.fillStyle = '#999999';  
+	// ctx.fillRect(this.ship.x - (this.ship.width / 2), this.ship.y - (this.ship.height / 2), this.ship.width, this.ship.height);
+	
+    //  Yu Draw ship.
+	ctx.strokeStyle = "rgba(200, 200, 200, 0.5)";		//Yu added
+    ctx.fillStyle = '#f56f18'; 							 // Yu added 
+    roundRect(ctx, this.ship.x - (this.ship.width / 2), this.ship.y - (this.ship.height / 2), this.ship.width, this.ship.height, 5, true);								// Maria ändrade till true
+	
     //  Draw invaders.
     ctx.fillStyle = '#006600';
     for(var i=0; i<this.invaders.length; i++) {
@@ -562,12 +654,20 @@ PlayState.prototype.draw = function(game, dt, ctx) {
         ctx.fillRect(bomb.x - 2, bomb.y - 2, 4, 4);
     }
 
+	// draw ball						//Kim lagt till 
+	ctx.fillStyle = '#abc';
+	ctx.beginPath();
+	ctx.arc(this.ball.position.x, this.ball.position.y, this.ball.width, 0, 2 * Math.PI, false);
+	ctx.fill();
+	
+
     //  Draw rockets.
+	/*
     ctx.fillStyle = '#ff0000';
     for(var i=0; i<this.rockets.length; i++) {
         var rocket = this.rockets[i];
         ctx.fillRect(rocket.x, rocket.y - 2, 1, 4);
-    }
+    }	*/											// Yu tagit bort hit
 
     //  Draw info.
     var textYpos = game.gameBounds.bottom + ((game.height - game.gameBounds.bottom) / 2) + 14/2;
@@ -593,10 +693,13 @@ PlayState.prototype.draw = function(game, dt, ctx) {
 
 PlayState.prototype.keyDown = function(game, keyCode) {
 
-    if(keyCode == 32) {
+	/*
+    if(keyCode == 32) { 		//Yu tagit bort
         //  Fire!
         this.fireRocket();
-    }
+    }		// Yu tagit bort hit
+	*/
+	
     if(keyCode == 80) {
         //  Push the pause state.
         game.pushState(new PauseState());
@@ -607,6 +710,7 @@ PlayState.prototype.keyUp = function(game, keyCode) {
 
 };
 
+/*																		// Yu tagit bort
 PlayState.prototype.fireRocket = function() {
     //  If we have no last rocket time, or the last rocket time 
     //  is older than the max rocket rate, we can fire.
@@ -620,6 +724,47 @@ PlayState.prototype.fireRocket = function() {
         game.sounds.playSound('shoot');
     }
 };
+*/
+
+/**
+ * Draws a rounded rectangle using the current state of the canvas. 
+ * If you omit the last three params, it will draw a rectangle 
+ * outline with a 5 pixel border radius 
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {Number} x The top left x coordinate
+ * @param {Number} y The top left y coordinate 
+ * @param {Number} width The width of the rectangle 
+ * @param {Number} height The height of the rectangle
+ * @param {Number} radius The corner radius. Defaults to 5;
+ * @param {Boolean} fill Whether to fill the rectangle. Defaults to false.
+ * @param {Boolean} stroke Whether to stroke the rectangle. Defaults to true.
+ */
+
+function roundRect(ctx, x, y, width, height, radius, fill, stroke) {
+  if (typeof stroke == "undefined" ) {
+    stroke = true;
+  }
+  if (typeof radius === "undefined") {
+    radius = 5;
+  }
+  ctx.beginPath();
+  ctx.moveTo(x + radius, y);
+  ctx.lineTo(x + width - radius, y);
+  ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+  ctx.lineTo(x + width, y + height - radius);
+  ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+  ctx.lineTo(x + radius, y + height);
+  ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+  ctx.lineTo(x, y + radius);
+  ctx.quadraticCurveTo(x, y, x + radius, y);
+  ctx.closePath();
+  if (stroke) {
+    ctx.stroke();
+  }
+  if (fill) {
+    ctx.fill();
+  }        
+}
 
 function PauseState() {
 
@@ -692,7 +837,39 @@ LevelIntroState.prototype.draw = function(game, dt, ctx) {
     return;
 };
 
+/*
+	Our breakout 'ball'								// kim lagt till
+*/
+function Ball(x, y) {
+	this.position = new Vector2(x,y);
+	this.width = 4;
+	this.height = 4;
+	this.direction = new Vector2(4, 4);
+}
 
+function Vector2(x, y) {						// kim lagt till
+	this.x = x;
+	this.y = y;
+	this.rotate = function(angle) {
+		var ca = Math.cos(angle);
+		var sa = Math.sin(angle);
+	var newV = new Vector2(ca * this.x - sa * this.y, sa * this.x + ca * this.y);
+	this.x = newV.x;
+	this.y = newV.y;
+	}
+	this.scale = function(scalar) { 
+		this.x *= scalar;
+		this.y *= scalar;
+	}
+	this.add = function(vector) { 
+		this.x += vector.x;
+		this.y += vector.y;
+	}
+	this.subtract = function(vector) {
+		this.x -= vector.x;
+		this.y -= vector.y;
+	}
+}
 /*
  
   Ship
@@ -701,19 +878,20 @@ LevelIntroState.prototype.draw = function(game, dt, ctx) {
 function Ship(x, y) {
     this.x = x;
     this.y = y;
-    this.width = 20;
-    this.height = 16;
+    this.width = 30 * 1.5; //60		// Original: this.width = 20;
+    this.height = 25* 2/3;  //16 // Original: this.height = 16;
 }
 
 /*
-    Rocket
+    Rocket																// Yu tagit bort
     Fired by the ship, they've got a position, velocity and state.
     */
+	/*
 function Rocket(x, y, velocity) {
     this.x = x;
     this.y = y;
     this.velocity = velocity;
-}
+}		*/		 														// Yu tagit bort hit
 
 /*
     Bomb
@@ -819,4 +997,4 @@ Sounds.prototype.playSound = function(name) {
     source.start(0);
 };
 
-git 
+ 
