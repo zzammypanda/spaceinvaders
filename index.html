@@ -27,6 +27,8 @@
                 width: 100%;
                 margin-left: 25%;
                 margin-right: 25%;
+				margin-top: 5%;
+				 
             }
             #gamecanvas { 
                 width: 100%;
@@ -38,7 +40,7 @@
                 margin-left: 15%;
                 margin-right: 15%;
 				margin-bottom: 5%;
-				text-align: center;
+				text-align: center;	
 				color: GhostWhite;
             }
 			a:link, a:visited, a:hover, a:active {
@@ -79,7 +81,7 @@
         <canvas id="gameCanvas"></canvas>
         </div>
         <div id="info">
-            <p> <a id="muteLink" href="#" onclick="toggleMute()">mute</a></p> 			
+            <p> <a id="muteLink" href="#" style="color:#087198;" onclick="toggleMute()">mute</a></p> 			
 			<p>Move ship with arrow keys. Press 'p' to pause game.</p>
 			<p>The invaders get faster and drop more bombs as you complete each level!</p>
   			
@@ -115,9 +117,9 @@
 					
 		//  Setup the canvas.
             var canvas = document.getElementById("gameCanvas");
-            canvas.width = newWidth/2;
-            canvas.height = newHeight/2;
-
+			canvas.width = newWidth/2;
+			canvas.height = newHeight/2;
+			
             //  Create the game.
             var game = new Game();
 
@@ -145,20 +147,19 @@
                 game.mute();
                 document.getElementById("muteLink").innerText = game.sounds.mute ? "unmute" : "mute";
             }
-			
         </script>
         <script type="text/javascript">
 
-			var _gaq = _gaq || [];
-			_gaq.push(['_setAccount', 'UA-41728580-1']);
-			_gaq.push(['_trackPageview']);
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-41728580-1']);
+  _gaq.push(['_trackPageview']);
 
-			(function() {
-				var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-				ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-				var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-			})();
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
 
-		</script>
+</script>
     </body>
 </html>
