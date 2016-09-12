@@ -24,10 +24,10 @@
 //  Creates an instance of the Game class.
 function Game() {
 
-var w = window.innerWidth || document.documentElement.clientWidth
+	// Measures screen size and use it
+	var w = window.innerWidth || document.documentElement.clientWidth
 		|| document.body.clientWidth;
-
-var h = window.innerHeight || document.documentElement.clientHeight
+	var h = window.innerHeight || document.documentElement.clientHeight
 		|| document.body.clientHeight;
 
     //  Set the initial config.
@@ -40,7 +40,6 @@ var h = window.innerHeight || document.documentElement.clientHeight
         invaderDropDistance: 20,
         gameWidth: 400,
         gameHeight: 300,
-
         fps: 50,
         debugMode: false,
         invaderRanks: 5,
@@ -50,7 +49,7 @@ var h = window.innerHeight || document.documentElement.clientHeight
         pointsPerInvader: 5
     };
 
-    //  All state is in the variables below.
+    //  Game state is in these variables
     this.lives = 3;
     this.width = 0;
     this.height = 0;
@@ -60,26 +59,20 @@ var h = window.innerHeight || document.documentElement.clientHeight
     this.level = 1;
 	this.player = ""; 
 	this.highscores = [];
-
-    //  The state stack.
     this.stateStack = [];
-
-    //  Input/output
     this.pressedKeys = {};
     this.gameCanvas =  null;
-
-    //  All sounds.
     this.sounds = null;
 }
 
 //  Initialis the Game with a canvas.
 Game.prototype.initialise = function(gameCanvas) {
 	
-	this.player = prompt('Please tell us your name, stranger!'); // Added maria
+	// Names player or set name to default option
+	this.player = prompt('Please tell us your name, stranger!'); 
 	if (this.player == null || this.player === "")
 		this.player = "fegis";
 	
-
     //  Set the game canvas.
     this.gameCanvas = gameCanvas;
 
@@ -87,8 +80,6 @@ Game.prototype.initialise = function(gameCanvas) {
     this.width = gameCanvas.width;
     this.height = gameCanvas.height;
 
-	
-	
     //  Set the state game bounds.
     this.gameBounds = {
         left: gameCanvas.width / 2 - this.config.gameWidth / 2,
@@ -151,7 +142,7 @@ Game.prototype.mute = function(mute) {
     }
 };
 
-//  The main loop.
+//  The game main loop.
 function GameLoop(game) {
     var currentState = game.currentState();
     if(currentState) {
@@ -162,10 +153,8 @@ function GameLoop(game) {
         //  Get the drawing context.
         var ctx = this.gameCanvas.getContext("2d");
 		
-		
-		
-        //  Update if we have an update function. Also draw
-        //  if we have a draw function.
+        //  Update if we have an update function. 
+        //  Draw if we have a draw function.
         if(currentState.update) {
             currentState.update(game, dt);
         }
@@ -175,6 +164,7 @@ function GameLoop(game) {
     }
 }
 
+// Add state to state stack
 Game.prototype.pushState = function(state) {
 
     //  If there's an enter function for the new state, call it.
@@ -185,14 +175,14 @@ Game.prototype.pushState = function(state) {
     this.stateStack.push(state);
 };
 
+// Remove state from state stack
 Game.prototype.popState = function() {
 
-    //  Leave and pop the state.
     if(this.currentState()) {
-        if(this.currentState().leave) {
+    //  Leave the state if applicable
+	if(this.currentState().leave) {
             this.currentState().leave(game);
         }
-
         //  Set the current state.
         this.stateStack.pop();
     }
@@ -221,6 +211,7 @@ Game.prototype.keyUp = function(keyCode) {
     }
 };
 
+// Presentation screen
 function WelcomeState() {
 
 }
@@ -236,8 +227,6 @@ WelcomeState.prototype.enter = function(game) {
 };
 
 WelcomeState.prototype.update = function (game, dt) {
-
-
 };
 
 WelcomeState.prototype.draw = function(game, dt, ctx) {
@@ -245,28 +234,26 @@ WelcomeState.prototype.draw = function(game, dt, ctx) {
     //  Clear the background.
     ctx.clearRect(0, 0, game.width, game.height);
 
+	// Make rectangle around the bouncing area 
 	ctx.lineWidth = 10;
 	ctx.strokeStyle="#b8a8a8";
 	//	ctx.strokeStyle="#006600";		// Original FF0000, maria changed to same as invaders, slightly less intrusive
 	ctx.strokeRect(0,0,game.width, game.height);
 	ctx.fill();
 	
-	
+	// Text
     ctx.font="30px Arial";
     ctx.fillStyle = '#ffffff';
     ctx.textBaseline="center"; 
     ctx.textAlign="center"; 
     ctx.fillText("BreakoutInvaders", game.width / 2, game.height/2 - 40); 
     ctx.font="16px Arial";
-
     ctx.fillText("Press 'Space' to start.", game.width / 2, game.height/2); 
-	
-	
 };
 
+//  Space starts the game.
 WelcomeState.prototype.keyDown = function(game, keyCode) {
     if(keyCode == 32) /*space*/ {
-        //  Space starts the game.
         game.level = 1;
         game.score = 0;
         game.lives = 3;
@@ -274,6 +261,7 @@ WelcomeState.prototype.keyDown = function(game, keyCode) {
     }
 };
 
+// Game Over-screen with highscore 
 function GameOverState() {
 
 }
@@ -291,13 +279,15 @@ GameOverState.prototype.draw = function(game, dt, ctx) {
     ctx.fillStyle = '#ffffff';
     ctx.textBaseline="center"; 
     ctx.textAlign="center"; 
-		
+
+	// Game Over with score
 	ctx.fillText("Game Over, " + game.player + "!", game.width / 2, game.height/2 - 40); 
     ctx.font="16px Arial";
     ctx.fillText("You scored " + game.score + " and got to level " + game.level, game.width / 2, game.height/2);	
     ctx.font="16px Arial";
     ctx.fillText("Press 'Space' to play again.", game.width / 2, game.height/2 + 40);   
 
+	// Highscore list
 	ctx.font="20px Arial";
 	var textOffset = game.height/2 + 120;
     ctx.fillText("Hall Of Fame", game.width / 2, textOffset); 
@@ -306,14 +296,13 @@ GameOverState.prototype.draw = function(game, dt, ctx) {
 	var i;
 	for (i=0; i < 3; i++){
 		textOffset += 25; 
-		ctx.fillText(game.highscores[i], game.width / 2, textOffset);		
+		ctx.fillText(game.highscores[i], game.width / 2, textOffset		
 	}
-
 };
 
+//  Space restarts the game.
 GameOverState.prototype.keyDown = function(game, keyCode) {
     if(keyCode == 32) /*space*/ {
-        //  Space restarts the game.
         game.lives = 3;
         game.score = 0;
         game.level = 1;
@@ -333,7 +322,7 @@ function PlayState(config, level) {
     
     //  Game entities.
     this.ship = null;
-    this.ball = null;		// Kim lagt tills
+    this.ball = null;	
     this.invaders = [];
     this.bombs = [];
 }
@@ -342,10 +331,8 @@ PlayState.prototype.enter = function(game) {
 
     //  Create the ship.
     this.ship = new Ship(game.width / 2, game.gameBounds.bottom);
-
     //  Create new ball.
-    this.ball = new Ball(game.width / 2, game.gameBounds.bottom - 10);		//Kim lagt till
-
+    this.ball = new Ball(game.width / 2, game.gameBounds.bottom - 10);
     //  Setup initial state.
     this.invaderCurrentVelocity =  10;
     this.invaderCurrentDropDistance =  0;
@@ -410,11 +397,9 @@ PlayState.prototype.update = function(game, dt) {
         }
     }
 
-	   // Move the ball											// Kim lagt till
-	   
+	// Move the ball
     this.ball.position.add(this.ball.direction);
-	if(this.ball.position.y <= game.gameBounds.top) { //|| this.ball.position.y >= this.ship.y
-		//this.ball.direction.scale(-1); // invert!
+	if(this.ball.position.y <= game.gameBounds.top) { 
 		if(this.ball.direction.x > 0){
 			this.ball.direction.rotate(Math.PI / 2);
 		}
@@ -422,6 +407,7 @@ PlayState.prototype.update = function(game, dt) {
 			this.ball.direction.rotate(Math.PI / -2);
 		}
 	}
+	// 
 	if(this.ball.position.y >= this.ship.y)
 		if(this.ball.direction.x > 0){
 			this.ball.direction.rotate(Math.PI / -2);
@@ -429,7 +415,7 @@ PlayState.prototype.update = function(game, dt) {
 		else{
 			this.ball.direction.rotate(Math.PI / 2);
 		}
-	
+	//
 	if(this.ball.position.x <= game.gameBounds.left) {
 		if(this.ball.direction.y > 0){
 			this.ball.direction.rotate(Math.PI / -2);
@@ -438,7 +424,7 @@ PlayState.prototype.update = function(game, dt) {
 			this.ball.direction.rotate(Math.PI / 2);
 		}
 	}
-
+	//
 	if(this.ball.position.x >= game.gameBounds.right) {
 		
 		if(this.ball.direction.y > 0){
@@ -447,8 +433,7 @@ PlayState.prototype.update = function(game, dt) {
 		else{
 			this.ball.direction.rotate(Math.PI / -2);
 		}
-	}															// Kim lagt till hit
-	
+	}
 	
     //  Move the invaders.
     var hitLeft = false, hitRight = false, hitBottom = false;
@@ -456,18 +441,21 @@ PlayState.prototype.update = function(game, dt) {
         var invader = this.invaders[i];
         var newx = invader.x + this.invaderVelocity.x * dt;
         var newy = invader.y + this.invaderVelocity.y * dt;
-        if(hitLeft == false && ((newx -40) < game.gameBounds.left)) {
-	//  if(hitLeft == false && ((newx -40) < game.gameBounds.left)) { // Yu added, Original: if(hitLeft == false && newx < game.gameBounds.left) {
-
+		// Reached left boundary
+        if(hitLeft == false && ((newx -40) < game.gameBounds.left)) {//  Original: if(hitLeft == false && newx < game.gameBounds.left) {
             hitLeft = true;
         }
-        else if(hitRight == false && ((newx +40) > game.gameBounds.right)) { // Yu added, Original: else if(hitRight == false && newx > game.gameBounds.right) {
+		//Hit right boundary
+        else if(hitRight == false && ((newx +40) > game.gameBounds.right)) { 
+		// Original: else if(hitRight == false && newx > game.gameBounds.right) {
             hitRight = true;
         }
+		// Hit bottom boundary
         else if(hitBottom == false && newy > game.gameBounds.bottom) {
             hitBottom = true;
         }
 
+		// start invaders off on closer track ???
         if(!hitLeft && !hitRight && !hitBottom) {
             invader.x = newx;
             invader.y = newy;
@@ -483,6 +471,7 @@ PlayState.prototype.update = function(game, dt) {
             this.invaderCurrentDropDistance = 0;
         }
     }
+	
     //  If we've hit the left, move down then right.
     if(hitLeft) {
         this.invaderCurrentVelocity += this.config.invaderAcceleration;
@@ -501,13 +490,13 @@ PlayState.prototype.update = function(game, dt) {
     if(hitBottom) {
         this.lives = 0;
     }
-    
+  /*  
     //  Check for rocket/invader collisions.
     for(i=0; i<this.invaders.length; i++) {
         var invader = this.invaders[i];
         var bang = false;
 		
-		/*for(var j=0; j<this.rockets.length; j++){	// Kim tagit bort		// Yu tagit bort
+		for(var j=0; j<this.rockets.length; j++){	// Kim tagit bort		// Yu tagit bort
             var rocket = this.rockets[j];			// Kim tagit bort
 													// Kim lagt till
 			//if(this.ball.position.x >= (invader.x - invader.width/2) && this.ball.position.x <= (invader.x + invader.width/2) && this.ball.position.y >= (invader.y - invader.height/2) && this.ball.position.y <= (invader.y + invader.height/2)) {
@@ -527,7 +516,7 @@ PlayState.prototype.update = function(game, dt) {
 				
                 break;
             }
-        } */
+        } 
 		
         //for(var j=0; j<this.rockets.length; j++){	// Kim tagit bort		// Yu tagit bort
             //var rocket = this.rockets[j];			// Kim tagit bort
@@ -551,6 +540,32 @@ PlayState.prototype.update = function(game, dt) {
         //}		 											// Kim tagit bort // Yu tagit bort hit
         if(bang) {
             //this.invaders.splice(i--, 1);				// Kim tagit bort
+            game.sounds.playSound('bang');
+        }
+    }
+*/
+	// Studsande bollen
+	for(i=0; i<this.invaders.length; i++) {
+        var invader = this.invaders[i];
+        var bang = false;
+
+        //for(var j=0; j<rocket.length; j++){
+        //    var rocket = this.rockets[j];
+
+		if(this.ball.position.x >= (invader.x - invader.width/2) && this.ball.position.x <= (invader.x + invader.width/2) &&
+			this.ball.position.y >= (invader.y - invader.height/2) && this.ball.position.y <= (invader.y + invader.height/2)) {
+                
+                //  Remove the rocket, set 'bang' so we don't process
+                //this.rockets.splice(j--, 1);
+                //  this rocket again.
+			bang = true;
+			game.score += this.config.pointsPerInvader;
+			this.invaders.splice(i--, 1);
+			this.ball.direction.rotate(Math.PI / 2);
+            //break;
+        }
+        //}
+        if(bang) {    
             game.sounds.playSound('bang');
         }
     }
@@ -587,8 +602,7 @@ PlayState.prototype.update = function(game, dt) {
             this.bombs.splice(i--, 1);
             game.lives--;
             game.sounds.playSound('explosion');
-        }
-                
+        }    
     }
 
     //  Check for invader/ship collisions.
@@ -604,7 +618,7 @@ PlayState.prototype.update = function(game, dt) {
         }
     }
 
-    //  Check for Game Over and write score + play name to database, get highscore from database
+    //  Check for Game Over and write score + player name to database, get highscore from database
     if(game.lives <= 0) {
 		insertDB(game.player, game.score, 2); 
 		game.highscores=selectDB(2); 		
@@ -624,40 +638,37 @@ PlayState.prototype.draw = function(game, dt, ctx) {
     //  Clear the background.
     ctx.clearRect(0, 0, game.width, game.height);
     
-	
-	ctx.lineWidth = 10;									// Yu added	
-	ctx.strokeStyle="#006600";					// Original FF0000, maria changed to same as invaders, less intrusive
+	// Draw line around bouncing area
+	ctx.lineWidth = 10;										
+	ctx.strokeStyle="#006600";
 	ctx.strokeRect(0,0,game.width, game.height);
 	ctx.fill();
-	
-	
-    //  Draw ship.
+		
+    // Draw ship.
     ctx.fillStyle = '#1D88B0';
 	ctx.strokeStyle="##087198";
     roundRect(ctx, this.ship.x - (this.ship.width / 2), this.ship.y - (this.ship.height / 2 +5), this.ship.width, this.ship.height - 5, 5, true);
 	
-	
-    //  Draw invaders.
+    // Draw invaders.
     ctx.fillStyle = '#b3ced8';
     for(var i=0; i<this.invaders.length; i++) {
         var invader = this.invaders[i];
         ctx.fillRect(invader.x - invader.width/2, invader.y - invader.height/2, invader.width, invader.height);
     }
 
-    //  Draw bombs.
+    // Draw bombs.
     ctx.fillStyle = '#ff5555';
     for(var i=0; i<this.bombs.length; i++) {
         var bomb = this.bombs[i];
         ctx.fillRect(bomb.x - 2, bomb.y - 2, 4, 4);
     }
 
-	// draw ball						//Kim lagt till 
+	// Draw ball 
 	ctx.fillStyle = '#abc';
 	ctx.beginPath();
 	ctx.arc(this.ball.position.x, this.ball.position.y, this.ball.width, 0, 2 * Math.PI, false);
 	ctx.fill();
 	
-
     //  Draw rockets.
 	/*
     ctx.fillStyle = '#ff0000';
@@ -685,13 +696,13 @@ PlayState.prototype.draw = function(game, dt, ctx) {
             game.gameBounds.right - game.gameBounds.left,
             game.gameBounds.bottom - game.gameBounds.top);
     }
-
 };
 
+//  Push the pause state.
 PlayState.prototype.keyDown = function(game, keyCode) {
 
     if(keyCode == 80) {
-        //  Push the pause state.
+		// 'p' for pause
         game.pushState(new PauseState());
     }
 };
@@ -743,10 +754,11 @@ function PauseState() {
 
 }
 
+// Play again from paused game
 PauseState.prototype.keyDown = function(game, keyCode) {
 
     if(keyCode == 80) {
-        //  Pop the pause state.
+        //  'p' for unpause
         game.popState();
     }
 };
@@ -811,9 +823,7 @@ LevelIntroState.prototype.draw = function(game, dt, ctx) {
     return;
 };
 
-/*
-	Our breakout 'ball'								// kim lagt till
-*/
+// Our breakout 'ball'
 function Ball(x, y) {
 	this.position = new Vector2(x,y);
 	this.width = 4;
@@ -821,7 +831,7 @@ function Ball(x, y) {
 	this.direction = new Vector2(4, 4);
 }
 
-function Vector2(x, y) {						// kim lagt till
+function Vector2(x, y) {
 	this.x = x;
 	this.y = y;
 	this.rotate = function(angle) {
@@ -844,13 +854,7 @@ function Vector2(x, y) {						// kim lagt till
 		this.y -= vector.y;
 	}
 }
-/*
- 
-  Ship
-
-  The ship has a position and that's about it.
-
-*/
+// The ship has a position and that's about it.
 function Ship(x, y) {
     this.x = x;
     this.y = y;
@@ -858,24 +862,14 @@ function Ship(x, y) {
     this.height = 25* 2/3;  //16 // Original: this.height = 16;
 }
 
-/*
-    Bomb
-
-    Dropped by invaders, they've got position, velocity.
-
-*/
+// Bombs dropped by invaders, they've got position, velocity.
 function Bomb(x, y, velocity) {
     this.x = x;
     this.y = y;
     this.velocity = velocity;
 }
  
-/*
-    Invader 
-
-    Invader's have position, type, rank/file and that's about it. 
-*/
-
+// Invader's have position, type, rank/file and that's about it. 
 function Invader(x, y, rank, file, type) {
     this.x = x;
     this.y = y;
@@ -886,15 +880,10 @@ function Invader(x, y, rank, file, type) {
     this.height = 14;
 }
 
-/*
-    Game State
-
-    A Game State is simply an update and draw proc.
-    When a game is in the state, the update and draw procs are
-    called, with a dt value (dt is delta time, i.e. the number)
-    of seconds to update or draw).
-
-*/
+// A Game State is simply an update and draw proc.
+// When a game is in the state, the update and draw procs are
+// called, with a dt value (dt is delta time, i.e. the number)
+// of seconds to update or draw).
 function GameState(updateProc, drawProc, keyDown, keyUp, enter, leave) {
     this.updateProc = updateProc;
     this.drawProc = drawProc;
@@ -904,14 +893,8 @@ function GameState(updateProc, drawProc, keyDown, keyUp, enter, leave) {
     this.leave = leave;
 }
 
-/*
-
-    Sounds
-
-    The sounds class is used to asynchronously load sounds and allow
-    them to be played.
-
-*/
+//    The sounds class is used to asynchronously load sounds and allow
+//    sounds to be played.
 function Sounds() {
 
     //  The audio context.

@@ -1,0 +1,50 @@
+
+	JAutomate	Manuellt	Testat OK	Bug	
+Starta spelet:
+==============
+Efterfrågas spelarens namn?
+Tomt namn?
+Cancel-knappen?
+Hur långt namn får man ange?
+Hanteras ÅÄÖ?
+Hanteras specialtecken?
+Rätt text på startskärmen?
+Fungerar länkarna?
+Går länkarna till rätt ställen?
+Går det att pausa spelet när det inte är igång?
+Startas spelet med något annat än space?
+Startas spelet med space?
+Spela spelet:
+=============
+Rör stjärnorna sig?
+Styrs skeppet med pilknapparna?
+Visas poäng?
+Visas level?
+Visas liv?
+Visas spelarens namn?
+Syns spelelementen? (Skepp, invaders, boll, skott, kant)
+Tar bollen bort invaders? 
+Får man poäng för att ta bort invaders??
+Går det att pausa?
+Går det att återstarta spelet?
+Går det att mute:a?
+Går det att slå på ljudet igen?
+Rör invaders sig över skärmen?
+Rör sig invaders närmare efter att ha nått kanten?
+Dras det bort ett liv när invaders skott träffar skeppet?
+Dras det flera liv om många skott träffar skeppet samtidigt? (krasch)
+Förloras spelet om invaders når fram till skeppet? (krasch)
+Går det att spela spelet utan internetuppkoppling? (krasch)
+Game over:
+==========
+Visas game over-sidan efter 3 livsförluster?
+Visas highscorelistan?
+Är highscorelistan ordnad i poängordning?
+Finns spelaren med på highscorelistan om poängen är tillräckligt bra?
+Anges spelarens namn i game over-texten?
+Game Won:
+=========
+Går det att vinna spelet?
+Står det att spelaren vunnit?
+Visas highscorelistan?
+Finns spelaren med på highscorelistan om poängen är tillräckligt bra?
