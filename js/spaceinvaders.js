@@ -236,7 +236,7 @@ WelcomeState.prototype.draw = function(game, dt, ctx) {
 
 	// Make rectangle around the bouncing area 
 	ctx.lineWidth = 10;
-	ctx.strokeStyle="#b8a8a8";
+	ctx.strokeStyle="#2f4f4f";
 	//	ctx.strokeStyle="#006600";		// Original FF0000, maria changed to same as invaders, slightly less intrusive
 	ctx.strokeRect(0,0,game.width, game.height);
 	ctx.fill();
@@ -296,7 +296,7 @@ GameOverState.prototype.draw = function(game, dt, ctx) {
 	var i;
 	for (i=0; i < 3; i++){
 		textOffset += 25; 
-		ctx.fillText(game.highscores[i], game.width / 2, textOffset		
+		ctx.fillText(game.highscores[i], game.width / 2, textOffset);		
 	}
 };
 
@@ -640,13 +640,13 @@ PlayState.prototype.draw = function(game, dt, ctx) {
     
 	// Draw line around bouncing area
 	ctx.lineWidth = 10;										
-	ctx.strokeStyle="#006600";
+	ctx.strokeStyle="#2f4f4f";
 	ctx.strokeRect(0,0,game.width, game.height);
 	ctx.fill();
 		
     // Draw ship.
-    ctx.fillStyle = '#1D88B0';
-	ctx.strokeStyle="##087198";
+    ctx.fillStyle = '#b3ced8';
+	ctx.strokeStyle="#b3ced8";
     roundRect(ctx, this.ship.x - (this.ship.width / 2), this.ship.y - (this.ship.height / 2 +5), this.ship.width, this.ship.height - 5, 5, true);
 	
     // Draw invaders.
@@ -690,7 +690,7 @@ PlayState.prototype.draw = function(game, dt, ctx) {
 
     //  If we're in debug mode, draw bounds.
     if(this.config.debugMode) {
-        ctx.strokeStyle = '#b8a8a8';
+        ctx.strokeStyle = '#2f4f4f';
         ctx.strokeRect(0,0,game.width, game.height);
         ctx.strokeRect(game.gameBounds.left, game.gameBounds.top,
             game.gameBounds.right - game.gameBounds.left,
