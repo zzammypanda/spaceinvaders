@@ -44,7 +44,7 @@ function Game() {
         debugMode: false,
         invaderRanks: 5,
         invaderFiles: 10,
-        shipSpeed: 120,
+        shipSpeed: 280,
         levelDifficultyMultiplier: 0.2,
         pointsPerInvader: 5
     };
@@ -235,9 +235,8 @@ WelcomeState.prototype.draw = function(game, dt, ctx) {
     ctx.clearRect(0, 0, game.width, game.height);
 
 	// Make rectangle around the bouncing area 
-	ctx.lineWidth = 10;
+	ctx.lineWidth = 5;
 	ctx.strokeStyle="#2f4f4f";
-	//	ctx.strokeStyle="#006600";		// Original FF0000, maria changed to same as invaders, slightly less intrusive
 	ctx.strokeRect(0,0,game.width, game.height);
 	ctx.fill();
 	
@@ -285,11 +284,11 @@ GameOverState.prototype.draw = function(game, dt, ctx) {
     ctx.font="16px Arial";
     ctx.fillText("You scored " + game.score + " and got to level " + game.level, game.width / 2, game.height/2);	
     ctx.font="16px Arial";
-    ctx.fillText("Press 'Space' to play again.", game.width / 2, game.height/2 + 40);   
+    ctx.fillText("Press 'Space' to play again.", game.width / 2, game.height/2 + 20);   
 
 	// Highscore list
 	ctx.font="20px Arial";
-	var textOffset = game.height/2 + 120;
+	var textOffset = game.height/2 + 80;
     ctx.fillText("Hall Of Fame", game.width / 2, textOffset); 
 	textOffset += 5;	
 	ctx.font="16px Arial";
@@ -399,6 +398,7 @@ PlayState.prototype.update = function(game, dt) {
 
 	// Move the ball
     this.ball.position.add(this.ball.direction);
+	// Ball bounces on roof
 	if(this.ball.position.y <= game.gameBounds.top) { 
 		if(this.ball.direction.x > 0){
 			this.ball.direction.rotate(Math.PI / 2);
@@ -407,15 +407,17 @@ PlayState.prototype.update = function(game, dt) {
 			this.ball.direction.rotate(Math.PI / -2);
 		}
 	}
-	// 
-	if(this.ball.position.y >= this.ship.y)
+	// Ball bounces on bottom
+	if(this.ball.position.y >= this.ship.y){
 		if(this.ball.direction.x > 0){
 			this.ball.direction.rotate(Math.PI / -2);
 		}
 		else{
 			this.ball.direction.rotate(Math.PI / 2);
 		}
-	//
+		game.lives--;
+	}
+	// Ball bounces to left
 	if(this.ball.position.x <= game.gameBounds.left) {
 		if(this.ball.direction.y > 0){
 			this.ball.direction.rotate(Math.PI / -2);
@@ -424,7 +426,7 @@ PlayState.prototype.update = function(game, dt) {
 			this.ball.direction.rotate(Math.PI / 2);
 		}
 	}
-	//
+	// Ball bounces at right
 	if(this.ball.position.x >= game.gameBounds.right) {
 		
 		if(this.ball.direction.y > 0){
@@ -490,68 +492,23 @@ PlayState.prototype.update = function(game, dt) {
     if(hitBottom) {
         this.lives = 0;
     }
-  /*  
-    //  Check for rocket/invader collisions.
-    for(i=0; i<this.invaders.length; i++) {
-        var invader = this.invaders[i];
-        var bang = false;
-		
-		for(var j=0; j<this.rockets.length; j++){	// Kim tagit bort		// Yu tagit bort
-            var rocket = this.rockets[j];			// Kim tagit bort
-													// Kim lagt till
-			//if(this.ball.position.x >= (invader.x - invader.width/2) && this.ball.position.x <= (invader.x + invader.width/2) && this.ball.position.y >= (invader.y - invader.height/2) && this.ball.position.y <= (invader.y + invader.height/2)) {
-  
-													// Kim tagit bort
-            if(rocket.x >= (invader.x - invader.width/2) && rocket.x <= (invader.x + invader.width/2) &&
-                rocket.y >= (invader.y - invader.height/2) && rocket.y <= (invader.y + invader.height/2)) {
-                
-                //  Remove the rocket, set 'bang' so we don't process
-                //  this rocket again.
-                this.rockets.splice(j--, 1);
-                bang = true;
-                game.score += this.config.pointsPerInvader;
-				
-				//this.invaders.splice(i--, 1);				// Kim lagt till
-				//this.ball.direction.rotate(Math.PI / 2);	// Kim lagt till
-				
-                break;
-            }
-        } 
-		
-        //for(var j=0; j<this.rockets.length; j++){	// Kim tagit bort		// Yu tagit bort
-            //var rocket = this.rockets[j];			// Kim tagit bort
 
-													// Kim lagt till
-			if(this.ball.position.x >= (invader.x - invader.width/2) && this.ball.position.x <= (invader.x + invader.width/2) && this.ball.position.y >= (invader.y - invader.height/2) && this.ball.position.y <= (invader.y + invader.height/2)) {
-													// Kim tagit bort
-            //if(rocket.x >= (invader.x - invader.width/2) && rocket.x <= (invader.x + invader.width/2) && rocket.y >= (invader.y - invader.height/2) && rocket.y <= (invader.y + invader.height/2)) {
-                
-                //  Remove the rocket, set 'bang' so we don't process
-                //  this rocket again.
-                this.rockets.splice(j--, 1);
-                bang = true;
-                game.score += this.config.pointsPerInvader;
-				
-				this.invaders.splice(i--, 1);				// Kim lagt till
-				this.ball.direction.rotate(Math.PI / 2);	// Kim lagt till
-				
-                break;
-            }
-        //}		 											// Kim tagit bort // Yu tagit bort hit
-        if(bang) {
-            //this.invaders.splice(i--, 1);				// Kim tagit bort
-            game.sounds.playSound('bang');
-        }
-    }
-*/
 	// Studsande bollen
 	for(i=0; i<this.invaders.length; i++) {
         var invader = this.invaders[i];
         var bang = false;
 
-        //for(var j=0; j<rocket.length; j++){
-        //    var rocket = this.rockets[j];
-
+		// Bounces off ship
+		if(this.ball.position.x >= (this.ship.x - this.ship.width/2) && this.ball.position.x <= (this.ship.x + this.ship.width/2) &&
+				this.ball.position.y >= (this.ship.y - this.ship.height/2) && this.ball.position.y <= (this.ship.y + this.ship.height/2)) {
+					if(this.ball.direction.x > 0){
+						this.ball.direction.rotate(Math.PI / -2);
+					}
+					else{
+						this.ball.direction.rotate(Math.PI / 2);
+				}
+			}
+			
 		if(this.ball.position.x >= (invader.x - invader.width/2) && this.ball.position.x <= (invader.x + invader.width/2) &&
 			this.ball.position.y >= (invader.y - invader.height/2) && this.ball.position.y <= (invader.y + invader.height/2)) {
                 
@@ -639,7 +596,7 @@ PlayState.prototype.draw = function(game, dt, ctx) {
     ctx.clearRect(0, 0, game.width, game.height);
     
 	// Draw line around bouncing area
-	ctx.lineWidth = 10;										
+	ctx.lineWidth = 5;										
 	ctx.strokeStyle="#2f4f4f";
 	ctx.strokeRect(0,0,game.width, game.height);
 	ctx.fill();
@@ -828,7 +785,7 @@ function Ball(x, y) {
 	this.position = new Vector2(x,y);
 	this.width = 4;
 	this.height = 4;
-	this.direction = new Vector2(4, 4);
+	this.direction = new Vector2(3, 3);
 }
 
 function Vector2(x, y) {
